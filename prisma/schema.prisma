@@ -1,0 +1,71 @@
+// Mealtify — schema do banco de dados
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// Perfil único da casa: objetivo nutricional atual + veto permanente de ingredientes.
+model HouseholdProfile {
+  id                   String   @id @default("singleton")
+  nutritionalObjective String   @default("Reduzir gordura e maximizar proteína")
+  updatedAt            DateTime @updatedAt
+}
+
+// Ingredientes vetados permanentemente pela família (perfil, não por semana).
+model BlacklistIngredient {
+  id        String   @id @default(cuid())
+  nome      String   @unique
+  createdAt DateTime @default(now())
+}
+
+enum PlanStatus {
+  DRAFT
+  GENERATING
+  READY
+  ERROR
+}
+
+// Um ciclo semanal de planejamento: dados de entrada do wizard + resultado gerado pela IA.
+model WeeklyPlan {
+  id     String @id @default(cuid())
+  label  String @default("")
+
+  nutritionalObjective String
+  fixedHelloFresh       String[]
+  fixedPicard           String[]
+  lockedDishes          Json     @default("[]")
+  extraVetos            String[]
+
+  status       PlanStatus @default(DRAFT)
+  errorMessage String?
+
+  diagnosticoCompensacao String?
+  scoreAtrito            Json?
+  cardapioSemanal        Json?
+  roteiroPreparoDomingo  String[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  shoppingItems ShoppingListItem[]
+
+  @@index([createdAt])
+}
+
+// Item vivo da lista de compras: reordena sozinho (pendentes A-Z em cima, marcados A-Z embaixo).
+model ShoppingListItem {
+  id           String   @id @default(cuid())
+  weeklyPlanId String
+  weeklyPlan   WeeklyPlan @relation(fields: [weeklyPlanId], references: [id], onDelete: Cascade)
+  nome         String
+  jaTenho      Boolean  @default(false)
+  createdAt    DateTime @default(now())
+
+  @@index([weeklyPlanId])
+}
