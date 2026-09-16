@@ -3,10 +3,17 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { ChipInput } from "@/components/ChipInput";
+import { PresetChipSelect } from "@/components/PresetChipSelect";
 import { LockToggle } from "@/components/LockToggle";
 import { PotLoader } from "@/components/PotLoader";
 import { crunchClick } from "@/lib/haptics";
-import { OBJETIVOS_NUTRICIONAIS, SLOT_KEYS, SLOT_LABELS, SlotKey } from "@/lib/schema";
+import {
+  OBJETIVOS_NUTRICIONAIS,
+  PICARD_DISHES_SUGERIDOS,
+  SLOT_KEYS,
+  SLOT_LABELS,
+  SlotKey,
+} from "@/lib/schema";
 
 type SlotState = { prato: string; locked: boolean };
 
@@ -104,11 +111,12 @@ export function PlanejarWizard({ defaultObjective }: { defaultObjective: string 
 
       <section className="flex flex-col gap-2">
         <h2 className="font-heading text-lg font-bold">Outras refeições fixas (Picard)</h2>
-        <ChipInput
+        <PresetChipSelect
           value={picard}
           onAdd={(nome) => setPicard((prev) => [...prev, nome])}
           onRemove={(nome) => setPicard((prev) => prev.filter((n) => n !== nome))}
-          placeholder="ex: Lasanha de berinjela"
+          options={PICARD_DISHES_SUGERIDOS}
+          placeholder="Selecione um prato Picard…"
         />
       </section>
 

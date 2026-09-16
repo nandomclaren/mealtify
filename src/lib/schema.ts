@@ -25,6 +25,16 @@ export const OBJETIVOS_NUTRICIONAIS = [
   "Reeducação alimentar leve",
 ] as const;
 
+export const PICARD_DISHES_SUGERIDOS = [
+  "Lasanha bolonhesa",
+  "Donburi poulet (frango com legumes, arroz e teriyaki)",
+  "Poulet karaage, riz et légumes cuisinés",
+  "Mini pizzas presunto e queijo",
+  "Bœuf aux oignons et nouilles chinoises aux légumes",
+  "Aligot de l'Aveyron et saucisse de Toulouse",
+  "Mini cheeseburgers",
+] as const;
+
 export const VETOS_SUGERIDOS = [
   "Frutos do mar",
   "Miúdos",
