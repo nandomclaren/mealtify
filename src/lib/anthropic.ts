@@ -12,12 +12,11 @@ import {
 
 const client = new Anthropic();
 
-const DIRETRIZES_SIMPLICIDADE = `SIMPLICIDADE OBRIGATÓRIA (a regra mais importante deste pedido): isso é almoço de dia a dia de um casal, comido sozinho em casa ou levado de marmita pro trabalho — NÃO é comida de ocasião especial. É TERMINANTEMENTE PROIBIDO:
-- Preparos com várias etapas de montagem ou "finalizações" (ex: "finalizado com molho de iogurte grego", "ao molho de ervas finas", reduções, cremes à parte).
-- Bowls compostos com 4 ou mais elementos separados montados no prato.
-- Nomenclatura afetada/gourmet (ex: "cubos de patinho com alho e páprica", "salsinha e limão", termos como "confit", "crocante", "al dente" como diferencial).
-- Combinações de mais de 3 componentes por prato.
-Em vez disso, cada prato deve ser: 1 proteína + 1 carboidrato simples + 1 vegetal (opcional), preparados do jeito mais direto possível (grelhado, assado no forno, refogado, cozido, no vapor). Nomeie o prato de forma simples e direta, como alguém diria em casa (ex: "Frango grelhado com arroz e brócolis", "Patinho moído com purê de batata", "Omelete com legumes e torrada") — nunca como item de cardápio de restaurante.`;
+const DIRETRIZES_SIMPLICIDADE = `SIMPLICIDADE OBRIGATÓRIA (a regra mais importante deste pedido): isso é almoço de dia a dia de um casal, comido sozinho em casa ou levado de marmita pro trabalho — NÃO é comida de ocasião especial. Técnicas básicas de preparo (cortar em cubos/tiras, temperar com sal/alho/páprica, grelhar, assar) são normais e NÃO tornam um prato complexo — o problema é a QUANTIDADE de componentes e etapas, não a técnica. É TERMINANTEMENTE PROIBIDO:
+- Preparos com uma etapa extra de "finalização" ou molho feito à parte (ex: "finalizado com molho de iogurte grego", "ao molho de ervas finas", reduções, cremes à parte) — o tempero vai direto no prato, sem componente extra pra fazer.
+- Pratos com 4 ou mais componentes separados no mesmo prato (ex: proteína + 2 acompanhamentos + molho à parte já são 4).
+- Nomenclatura de cardápio de restaurante (termos como "confit", "crocante", "al dente" como diferencial, ou listar 3+ ingredientes de tempero no nome do prato).
+Em vez disso, cada prato deve ter no máximo 3 componentes: 1 proteína + 1 carboidrato simples + 1 vegetal (o vegetal é opcional), temperados e preparados do jeito mais direto possível (grelhado, assado no forno, refogado, cozido, no vapor). Nomeie o prato de forma simples e direta, como alguém diria em casa (ex: "Frango grelhado com arroz e brócolis", "Patinho em cubos com purê de batata", "Omelete com legumes e torrada") — cortar em cubos, tiras ou fatias é só uma forma de corte, não um sinal de prato complexo.`;
 
 function buildPrompt(input: GeneratePlanInput, blacklist: string[]) {
   const vetosCompletos = Array.from(new Set([...blacklist, ...input.extraVetos]));
