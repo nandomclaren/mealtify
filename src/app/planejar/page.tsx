@@ -2,11 +2,17 @@ import { prisma } from "@/lib/prisma";
 import { PlanejarWizard } from "./PlanejarWizard";
 
 export default async function PlanejarPage() {
-  const profile = await prisma.householdProfile.upsert({
-    where: { id: "singleton" },
-    update: {},
-    create: { id: "singleton" },
-  });
+  const [profile, helloFreshDishes] = await Promise.all([
+    prisma.householdProfile.upsert({
+      where: { id: "singleton" },
+      update: {},
+      create: { id: "singleton" },
+    }),
+    prisma.helloFreshDish.findMany({
+      orderBy: [{ vezesUsado: "desc" }, { ultimoUso: "desc" }],
+      take: 200,
+    }),
+  ]);
 
   return (
     <div className="mx-auto flex max-w-md flex-col gap-6 px-5 pt-8 pb-4">
@@ -17,7 +23,10 @@ export default async function PlanejarPage() {
         </p>
       </header>
 
-      <PlanejarWizard defaultObjective={profile.nutritionalObjective} />
+      <PlanejarWizard
+        defaultObjective={profile.nutritionalObjective}
+        initialHelloFreshSuggestions={helloFreshDishes.map((d) => d.nome)}
+      />
     </div>
   );
 }

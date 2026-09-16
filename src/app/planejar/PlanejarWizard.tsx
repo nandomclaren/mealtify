@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { ChipInput } from "@/components/ChipInput";
+import { AutocompleteChipInput } from "@/components/AutocompleteChipInput";
 import { PresetChipSelect } from "@/components/PresetChipSelect";
 import { LockToggle } from "@/components/LockToggle";
 import { PotLoader } from "@/components/PotLoader";
@@ -23,10 +24,17 @@ const emptySlots = (): Record<SlotKey, SlotState> =>
     SlotState
   >;
 
-export function PlanejarWizard({ defaultObjective }: { defaultObjective: string }) {
+export function PlanejarWizard({
+  defaultObjective,
+  initialHelloFreshSuggestions,
+}: {
+  defaultObjective: string;
+  initialHelloFreshSuggestions: string[];
+}) {
   const router = useRouter();
   const [objetivo, setObjetivo] = useState(defaultObjective);
   const [helloFresh, setHelloFresh] = useState<string[]>([]);
+  const [helloFreshSuggestions, setHelloFreshSuggestions] = useState(initialHelloFreshSuggestions);
   const [picard, setPicard] = useState<string[]>([]);
   const [slots, setSlots] = useState<Record<SlotKey, SlotState>>(emptySlots);
   const [extraVetos, setExtraVetos] = useState<string[]>([]);
@@ -35,6 +43,21 @@ export function PlanejarWizard({ defaultObjective }: { defaultObjective: string 
 
   function updateSlot(slot: SlotKey, patch: Partial<SlotState>) {
     setSlots((prev) => ({ ...prev, [slot]: { ...prev[slot], ...patch } }));
+  }
+
+  function adicionarHelloFresh(nome: string) {
+    setHelloFresh((prev) => [...prev, nome]);
+    // guarda no catálogo pra sugerir da próxima vez (evita redigitar nomes longos toda semana)
+    setHelloFreshSuggestions((prev) =>
+      prev.some((s) => s.toLowerCase() === nome.toLowerCase()) ? prev : [nome, ...prev]
+    );
+    fetch("/api/hellofresh-dishes", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ nome }),
+    }).catch(() => {
+      // não é crítico: se falhar, só perde a sugestão futura, o plano continua normal
+    });
   }
 
   async function gerar() {
@@ -101,10 +124,11 @@ export function PlanejarWizard({ defaultObjective }: { defaultObjective: string 
       <section className="flex flex-col gap-2">
         <h2 className="font-heading text-lg font-bold">Jantares fixos (HelloFresh)</h2>
         <p className="text-sm text-cocoa-soft">O que já vem pronto/contratado essa semana.</p>
-        <ChipInput
+        <AutocompleteChipInput
           value={helloFresh}
-          onAdd={(nome) => setHelloFresh((prev) => [...prev, nome])}
+          onAdd={adicionarHelloFresh}
           onRemove={(nome) => setHelloFresh((prev) => prev.filter((n) => n !== nome))}
+          suggestions={helloFreshSuggestions}
           placeholder="ex: Strogonoff de frango"
         />
       </section>

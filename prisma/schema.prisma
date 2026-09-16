@@ -24,6 +24,16 @@ model BlacklistIngredient {
   createdAt DateTime @default(now())
 }
 
+// Catálogo de pratos HelloFresh já digitados, pra sugerir por autocomplete
+// (evita redigitar nomes longos toda semana). Cresce sozinho conforme o uso.
+model HelloFreshDish {
+  id         String   @id @default(cuid())
+  nome       String   @unique
+  vezesUsado Int      @default(1)
+  ultimoUso  DateTime @default(now())
+  createdAt  DateTime @default(now())
+}
+
 enum PlanStatus {
   DRAFT
   GENERATING
