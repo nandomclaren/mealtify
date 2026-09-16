@@ -49,26 +49,42 @@ DIRETRIZES DE CALIBRAGEM NUTRICIONAL E CULINÁRIA:
 Responda preenchendo exatamente o schema fornecido.`;
 }
 
+function friendlyParseError(error: unknown): Error {
+  if (
+    error instanceof Error &&
+    /failed to parse structured output/i.test(error.message)
+  ) {
+    return new Error(
+      "A resposta da IA veio incompleta (cortada no meio, provavelmente por causa do tamanho). Tenta de novo."
+    );
+  }
+  return error instanceof Error ? error : new Error("Erro desconhecido ao falar com a IA.");
+}
+
 export async function generateWeeklyPlan(
   input: GeneratePlanInput,
   blacklist: string[]
 ): Promise<WeeklyPlanAIResponse> {
   const prompt = buildPrompt(input, blacklist);
 
-  const message = await client.messages.parse({
-    model: "claude-opus-5",
-    max_tokens: 8000,
-    messages: [{ role: "user", content: prompt }],
-    output_config: {
-      format: zodOutputFormat(weeklyPlanAIResponseSchema),
-    },
-  });
+  try {
+    const message = await client.messages.parse({
+      model: "claude-opus-5",
+      max_tokens: 8000,
+      messages: [{ role: "user", content: prompt }],
+      output_config: {
+        format: zodOutputFormat(weeklyPlanAIResponseSchema),
+      },
+    });
 
-  if (!message.parsed_output) {
-    throw new Error("A IA não retornou um cardápio em formato válido.");
+    if (!message.parsed_output) {
+      throw new Error("A IA não retornou um cardápio em formato válido.");
+    }
+
+    return message.parsed_output;
+  } catch (error) {
+    throw friendlyParseError(error);
   }
-
-  return message.parsed_output;
 }
 
 export type RegenerateDishInput = {
@@ -128,18 +144,23 @@ Responda preenchendo exatamente o schema fornecido: o novo prato, a lista de com
 export async function regenerateDish(input: RegenerateDishInput): Promise<RetryDishResult> {
   const prompt = buildRetryPrompt(input);
 
-  const message = await client.messages.parse({
-    model: "claude-opus-5",
-    max_tokens: 3000,
-    messages: [{ role: "user", content: prompt }],
-    output_config: {
-      format: zodOutputFormat(retryDishSchema),
-    },
-  });
+  try {
+    const message = await client.messages.parse({
+      model: "claude-opus-5",
+      max_tokens: 8000,
+      output_config: {
+        format: zodOutputFormat(retryDishSchema),
+        effort: "low",
+      },
+      messages: [{ role: "user", content: prompt }],
+    });
 
-  if (!message.parsed_output) {
-    throw new Error("A IA não conseguiu sugerir um novo prato agora.");
+    if (!message.parsed_output) {
+      throw new Error("A IA não conseguiu sugerir um novo prato agora.");
+    }
+
+    return message.parsed_output;
+  } catch (error) {
+    throw friendlyParseError(error);
   }
-
-  return message.parsed_output;
 }
