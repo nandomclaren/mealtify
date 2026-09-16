@@ -1,8 +1,9 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
-import { CardapioSemanal, ScoreAtrito, SLOT_KEYS, SLOT_LABELS } from "@/lib/schema";
-import { Lock, ShoppingBasket, TriangleAlert } from "lucide-react";
+import { CardapioSemanal, ScoreAtrito } from "@/lib/schema";
+import { ShoppingBasket, TriangleAlert } from "lucide-react";
+import { CardapioInterativo } from "./CardapioInterativo";
 
 export default async function CardapioDetailPage({
   params,
@@ -67,41 +68,11 @@ export default async function CardapioDetailPage({
         )}
       </section>
 
-      <section className="flex flex-col gap-3">
-        {SLOT_KEYS.map((slot) => {
-          const prato = cardapio[slot];
-          return (
-            <div key={slot} className="card-cozy flex items-center gap-3 px-4 py-4">
-              <div className="flex-1">
-                <p className="text-xs font-semibold text-cocoa-soft">{SLOT_LABELS[slot]}</p>
-                <p className="font-heading text-base font-bold">{prato.prato}</p>
-                <p className="text-xs text-cocoa-soft">
-                  {prato.calorias} kcal · {prato.proteina_g}g proteína
-                </p>
-              </div>
-              {prato.travado && (
-                <span className="flex h-9 w-9 items-center justify-center rounded-full bg-butter text-cocoa">
-                  <Lock size={16} />
-                </span>
-              )}
-            </div>
-          );
-        })}
-      </section>
-
-      <section className="flex flex-col gap-2">
-        <h2 className="font-heading text-lg font-bold">Roteiro de preparo — domingo</h2>
-        <ol className="card-cozy flex flex-col gap-3 px-5 py-4">
-          {plan.roteiroPreparoDomingo.map((passo, i) => (
-            <li key={i} className="flex gap-3 text-sm">
-              <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-sage text-xs font-bold text-white">
-                {i + 1}
-              </span>
-              {passo}
-            </li>
-          ))}
-        </ol>
-      </section>
+      <CardapioInterativo
+        planId={plan.id}
+        initialCardapio={cardapio}
+        initialRoteiro={plan.roteiroPreparoDomingo}
+      />
 
       <Link
         href={`/compras/${plan.id}`}

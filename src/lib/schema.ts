@@ -34,7 +34,7 @@ export const VETOS_SUGERIDOS = [
   "Camarão",
 ] as const;
 
-const pratoSlotSchema = z.object({
+export const pratoSlotSchema = z.object({
   prato: z.string().describe("Nome do prato sugerido para esse horário"),
   calorias: z.number().describe("Calorias estimadas da porção"),
   proteina_g: z.number().describe("Gramas de proteína da porção"),
@@ -85,3 +85,23 @@ export const generatePlanInputSchema = z.object({
 });
 
 export type GeneratePlanInput = z.infer<typeof generatePlanInputSchema>;
+
+export const retryDishSchema = pratoSlotSchema.omit({ travado: true }).extend({
+  lista_compras_mercado: z
+    .array(z.string())
+    .describe(
+      "Lista de compras COMPLETA e atualizada da semana inteira, em ordem alfabética, já refletindo a troca deste prato (itens não afetados devem manter o texto idêntico ao da lista atual)"
+    ),
+  roteiro_preparo_domingo: z
+    .array(z.string())
+    .describe(
+      "Roteiro de preparo de domingo COMPLETO e atualizado, já refletindo a troca deste prato (passos não afetados devem manter o texto idêntico ao roteiro atual)"
+    ),
+});
+export type RetryDishResult = z.infer<typeof retryDishSchema>;
+
+export const retryDishInputSchema = z.object({
+  slot: z.enum(SLOT_KEYS),
+  excluded: z.array(z.string()).default([]),
+});
+export type RetryDishInput = z.infer<typeof retryDishInputSchema>;
